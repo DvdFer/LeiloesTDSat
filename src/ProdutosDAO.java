@@ -58,6 +58,34 @@ public class ProdutosDAO {
         }
     }
 
+    public boolean venderProduto(int id) {
+
+        String sql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?";
+
+        try {
+            conn = new conectaDAO().connectDB();
+
+            prep = conn.prepareStatement(sql);
+            prep.setInt(1, id);
+
+            int linhasAlteradas = prep.executeUpdate();
+
+            prep.close();
+            conn.close();
+
+            return linhasAlteradas > 0;
+
+        } catch (Exception erro) {
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Erro ao vender produto: " + erro.getMessage()
+            );
+
+            return false;
+        }
+    }
+
     public ArrayList<ProdutosDTO> listarProdutos() {
 
         listagem.clear();
@@ -95,5 +123,44 @@ public class ProdutosDAO {
         }
 
         return listagem;
+    }
+
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+
+        ArrayList<ProdutosDTO> vendidos = new ArrayList<>();
+
+        String sql = "SELECT id, nome, valor, status FROM produtos WHERE status = 'Vendido'";
+
+        try {
+            conn = new conectaDAO().connectDB();
+
+            prep = conn.prepareStatement(sql);
+            resultset = prep.executeQuery();
+
+            while (resultset.next()) {
+
+                ProdutosDTO produto = new ProdutosDTO();
+
+                produto.setId(resultset.getInt("id"));
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+
+                vendidos.add(produto);
+            }
+
+            resultset.close();
+            prep.close();
+            conn.close();
+
+        } catch (Exception erro) {
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Erro ao listar produtos vendidos: " + erro.getMessage()
+            );
+        }
+
+        return vendidos;
     }
 }
